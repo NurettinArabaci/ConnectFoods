@@ -6,7 +6,7 @@ public class StartPanel : PanelBase
 {
     protected override void ButtonOnClick()
     {
-        //PlayerManager.Instance.StartRecording();
+        GameStateEvent.Fire_OnChangeGameState(GameState.Play);
 
     }
 }

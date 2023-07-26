@@ -7,6 +7,11 @@ public class LevelManager : MonoSingleton<LevelManager>
 {
     [SerializeField] List<GameObject> _levels = new List<GameObject>();
 
+    [SerializeField] Level _levelPrefab;
+
+    [SerializeField] List<LevelData> levels = new List<LevelData>();
+    [SerializeField] Transform _levelParent;
+
     const string Levels = "Levels";
     const string Level = "Level";
 
@@ -33,7 +38,13 @@ public class LevelManager : MonoSingleton<LevelManager>
     }
     private void Start()
     {
-        LoadLevel();
+        //LoadLevel();
+        for (int i = 0; i < levels.Count; i++)
+        {
+            Level _level = Instantiate(_levelPrefab, _levelParent);
+
+            _level._data = levels[i];
+        }
     }
 
     private void LoadAllLevels()
