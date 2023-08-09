@@ -8,8 +8,9 @@ public enum PanelType
 {
     Start,
     Win,
-    Lose,
-    Tutorial
+    Lose,    
+    Tutorial,
+    Level
 }
 
 public class PanelBase : MonoBehaviour

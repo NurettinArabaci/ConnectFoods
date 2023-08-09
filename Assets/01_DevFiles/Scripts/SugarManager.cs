@@ -11,40 +11,34 @@ public class SugarEvents
 
 public class SugarManager : MonoSingleton<SugarManager>, IPointerDownHandler, IPointerUpHandler
 {
+    [HideInInspector]
+    public List<Sugar> initSugars = new List<Sugar>();
+
     public List<Sugar> sugarList = new List<Sugar>();
-    [HideInInspector] public List<Sugar> initSugars = new List<Sugar>();
-
-    [SerializeField] List<Sugar.SugarData> _sugarPrefabs = new List<Sugar.SugarData>();
-
-    
-
+    public List<Sugar.SugarData> _sugarPrefabs = new List<Sugar.SugarData>();
     public Dictionary<Vector3, Sugar> _sugarPoseDic = new Dictionary<Vector3, Sugar>();
-
-
-    [SerializeField] Sugar _mainPrefab;
-
-    [SerializeField] int width, height;
-
     public int moveCount = 0;
+
+
+    [SerializeField] Transform sugarParent;
+    [SerializeField] Sugar _mainPrefab;
+    [SerializeField] int width, height;
 
     private Vector3 pose;
     private Vector3 _dir;
-
     private bool isDragging;
-    private Coroutine calculateCR;
-    private RaycastHit hit;
+    private Coroutine _calculateCR;
+    private RaycastHit _hit;
     private Sugar _selectedSugar;
 
     public bool HasMove
     {
         get => moveCount > 0;
     }
-
     private Sugar LastMemberList
     {
         get => sugarList[ListCount - 1];
     }
-
     private int ListCount
     {
         get => sugarList.Count;
@@ -53,7 +47,7 @@ public class SugarManager : MonoSingleton<SugarManager>, IPointerDownHandler, IP
     protected override void Awake()
     {
         base.Awake();
-        InstantiateSugar();
+        Initialize();
     }
 
     private void Start()
@@ -82,35 +76,36 @@ public class SugarManager : MonoSingleton<SugarManager>, IPointerDownHandler, IP
 
             item.Die();
 
-            Sugar sugar = Instantiate(_mainPrefab, new Vector2(item.transform.position.x, height + increaseNum), Quaternion.identity, transform);
-            sugar.datas = _sugarPrefabs[Random.Range(0, _sugarPrefabs.Count)];
-            initSugars.Add(sugar);
+            InstantiateSugar((int)item.transform.position.x, height + increaseNum);
+           
             increaseNum++;
-
-            _sugarPoseDic.Add(sugar.transform.position, sugar);
-
-            
+    
         }
+
+        QuestManager.Instance.DecreaseQuest(sugarList[0].sugarType, increaseNum - 1);
     }
 
 
-    void InstantiateSugar()
+    private void Initialize()
     {
         for (int x = 0; x < width; x++)
-        {
-            
+        {           
             for (int y = 0; y < height; y++)
             {
-                Sugar sugar = Instantiate(_mainPrefab, new Vector2(x, y), Quaternion.identity, transform);
-                sugar.datas = _sugarPrefabs[Random.Range(0, _sugarPrefabs.Count)];
-                initSugars.Add(sugar);
-                _sugarPoseDic.Add(sugar.transform.position,sugar);
-
+                InstantiateSugar(x,y);
             }
         }
     }
 
-    void MixedSugars()
+    private void InstantiateSugar(int xAxis,int yAxis)
+    {
+        Sugar sugar = Instantiate(_mainPrefab, new Vector2(xAxis, yAxis), Quaternion.identity, sugarParent);
+        sugar.datas = _sugarPrefabs[Random.Range(0, _sugarPrefabs.Count)];
+        initSugars.Add(sugar);
+        _sugarPoseDic.Add(sugar.transform.position, sugar);
+    }
+
+    private void MixedSugars()
     {
         foreach (var item in initSugars)
         {
@@ -124,7 +119,7 @@ public class SugarManager : MonoSingleton<SugarManager>, IPointerDownHandler, IP
     {
         isDragging = true;
 
-        calculateCR = StartCoroutine(CalculateCR());
+        _calculateCR = StartCoroutine(CalculateCR());
 
 
     }
@@ -139,7 +134,7 @@ public class SugarManager : MonoSingleton<SugarManager>, IPointerDownHandler, IP
 
     }
 
-    void CheckHasMove()
+    private void CheckHasMove()
     {
 
         moveCount = 0;
@@ -154,7 +149,7 @@ public class SugarManager : MonoSingleton<SugarManager>, IPointerDownHandler, IP
     }
 
 
-    IEnumerator CalculateCR()
+    private IEnumerator CalculateCR()
     {
         while (isDragging)
         {
@@ -163,21 +158,19 @@ public class SugarManager : MonoSingleton<SugarManager>, IPointerDownHandler, IP
                 sugarList[ListCount - 1].SetLine(pose);
             yield return null;
         }
-        calculateCR = null;
+        _calculateCR = null;
     }
 
     
 
-    void LineRendererMethod()
+    private void LineRendererMethod()
     {
 
         pose = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-        
-
-        if (Physics.Raycast(pose, _dir, out hit, Mathf.Infinity))
+        if (Physics.Raycast(pose, _dir, out _hit, Mathf.Infinity))
         {
-            _selectedSugar = hit.collider.GetComponent<Sugar>();
+            _selectedSugar = _hit.collider.GetComponent<Sugar>();
 
 
             if (ListCount > 2 && _selectedSugar == sugarList[ListCount - 2])
@@ -215,10 +208,6 @@ public class SugarManager : MonoSingleton<SugarManager>, IPointerDownHandler, IP
                 sugarList[ListCount - 2].SetLine(LastMemberList.transform.position);
 
             }
-
-            
         }
-        
-
     }
 }

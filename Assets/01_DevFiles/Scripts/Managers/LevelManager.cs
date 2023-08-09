@@ -9,10 +9,12 @@ public class LevelManager : MonoSingleton<LevelManager>
 
     [SerializeField] Level _levelPrefab;
 
-    [SerializeField] List<LevelData> levels = new List<LevelData>();
+    [SerializeField] public List<LevelData> levels = new List<LevelData>();
     [SerializeField] Transform _levelParent;
+    PanelBase panelBase;
 
-    const string Levels = "Levels";
+    
+
     const string Level = "Level";
 
     public int LevelAmount
@@ -33,12 +35,12 @@ public class LevelManager : MonoSingleton<LevelManager>
     protected override void Awake()
     {
         base.Awake();
-        LoadAllLevels();
-        
+        panelBase=GetComponentInChildren<PanelBase>();
+
+
     }
     private void Start()
     {
-        //LoadLevel();
         for (int i = 0; i < levels.Count; i++)
         {
             Level _level = Instantiate(_levelPrefab, _levelParent);
@@ -46,41 +48,24 @@ public class LevelManager : MonoSingleton<LevelManager>
             _level._data = levels[i];
         }
     }
-
-    private void LoadAllLevels()
-    {
-        _levels = Resources.LoadAll<GameObject>(Levels).ToList();
-    }
-
     private void OpenActiveLevel()
     {
         Instantiate(_levels[ActiveLevel], transform);
     }
 
-    public void LoadLevel()
+    public void OpenLevelPanel()
     {
-        if (LevelAmount == 0)
-        {
+        panelBase.PanelActive(PanelType.Level);
+    }
 
-        }
-        DestroyOtherLevels();
-        OpenActiveLevel();
+    public void CloseLevelPanel()
+    {
+        panelBase.PanelPassive(PanelType.Level);
     }
 
     public void NextLevel()
     {
         LevelAmount++;
-        LoadLevel();
         GameStateEvent.Fire_OnChangeGameState(GameState.Begin);
-    }
-
-
-
-    void DestroyOtherLevels()
-    {
-        for (int i = 0; i < transform.childCount; i++)
-        {
-            Destroy(transform.GetChild(i).gameObject);
-        }
     }
 }

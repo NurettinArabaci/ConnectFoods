@@ -1,15 +1,14 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 public enum SugarType
 {
-    Blob,
-    Apple,
-    Pumpkin,
-    DragonFruit,
+    Orange,
+    Strawberry,
+    Lemon,
+    Lime,
     Blueberry
 }
 
@@ -22,8 +21,6 @@ public class Sugar : MonoBehaviour
         public SugarType type;
     }
 
-    public bool isSelected = false;
-
     public SugarData datas;
 
     public SugarType sugarType => datas.type;
@@ -32,7 +29,6 @@ public class Sugar : MonoBehaviour
     [SerializeField] private SpriteRenderer _frame;
     [SerializeField] private GameObject _explodeVFX;
     private Animation anim;
-
 
     private void Awake()
     {
